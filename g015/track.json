@@ -1,0 +1,359 @@
+{
+  "meta": {
+    "short-description": "Standard benchmark in Rally (8.6M POIs from Geonames)",
+    "description": "This test indexes 8.6M documents (POIs from Geonames, total 2.8 GB json) using 8 client threads and 5000 docs per bulk request against Elasticsearch",
+    "data-url": "http://benchmarks.elasticsearch.org.s3.amazonaws.com/corpora/g015"
+  },
+  "indices": [
+    {
+      "name": "geonames",
+      "types": [
+        {
+          "name": "type",
+          "mapping": "mappings.json",
+          "documents": "documents.json.bz2",
+          "document-count": 1297182,
+          "compressed-bytes": X,
+          "uncompressed-bytes": X
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "name": "index-append",
+      "operation-type": "index",
+      "bulk-size": 5000
+    },
+    {
+      "name": "index-update",
+      "operation-type": "index",
+      "bulk-size": 5000,
+      "conflicts": "random"
+    },
+    {
+      "name": "force-merge",
+      "operation-type": "force-merge"
+    },
+    {
+      "name": "index-stats",
+      "operation-type": "index-stats"
+    },
+    {
+      "name": "node-stats",
+      "operation-type": "node-stats"
+    },
+    {
+      "name": "default",
+      "operation-type": "search",
+      "body": {
+        "query": {
+          "match_all": {}
+        }
+      }
+    },
+    {
+      "name": "term",
+      "operation-type": "search",
+      "body": {
+        "query": {
+          "term": {
+            "country_code": "AT"
+          }
+        }
+      }
+    },
+    {
+      "name": "phrase",
+      "operation-type": "search",
+      "body": {
+        "query": {
+          "match_phrase": {
+            "name": "Sankt Georgen"
+          }
+        }
+      }
+    },
+    {
+      "name": "country_agg_uncached",
+      "operation-type": "search",
+      "cache": false,
+      "body": {
+        "size": 0,
+        "aggs": {
+          "country_population": {
+            "terms": {
+              "field": "country_code"
+            },
+            "aggs": {
+              "sum_population": {
+                "sum": {
+                  "field": "population"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "country_agg_cached",
+      "operation-type": "search",
+      "cache": true,
+      "body": {
+        "size": 0,
+        "aggs": {
+          "country_population": {
+            "terms": {
+              "field": "country_code"
+            },
+            "aggs": {
+              "sum_population": {
+                "sum": {
+                  "field": "population"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "scroll",
+      "operation-type": "search",
+      "pages": 25,
+      "results-per-page": 1000,
+      "body": {
+        "query": {
+          "match_all": {}
+        }
+      }
+    },
+    {
+      "name": "expression",
+      "operation-type": "search",
+      "body": {
+        "query": {
+          "function_score": {
+            "query": {
+              "match_all": {}
+            },
+            "functions": [
+              {
+                "script_score": {
+                  "script": {
+                    "inline": "(ln(abs(doc['population'])) + doc['elevation'] + doc['latitude']) * _score",
+                    "lang": "expression"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "painless_static",
+      "operation-type": "search",
+      "body": {
+        "query": {
+          "function_score": {
+            "query": {
+              "match_all": {}
+            },
+            "functions": [
+              {
+                "script_score": {
+                  "script": {
+                    "inline": "(Math.log(Math.abs((int)((List)doc.population).get(0))) + (double)((List)doc.elevation).get(0) * (double)((List)doc.latitude).get(0))/_score",
+                    "lang": "painless"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "painless_dynamic",
+      "operation-type": "search",
+      "body": {
+        "query": {
+          "function_score": {
+            "query": {
+              "match_all": {}
+            },
+            "functions": [
+              {
+                "script_score": {
+                  "script": {
+                    "inline": "(Math.log(Math.abs(doc['population'].value)) + doc['elevation'].value * doc['latitude'].value)/_score",
+                    "lang": "painless"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "challenges": [
+    {
+      "name": "append-no-conflicts",
+      "description": "Indexes the whole document corpus using Elasticsearch default settings. We only adjust the number of replicas as we benchmark a single node cluster and Rally will only start the benchmark if the cluster turns green. Document ids are unique so all index operations are append only. After that a couple of queries are run.",
+      "index-settings": {
+        "index.number_of_replicas": 0
+      },
+      "schedule": [
+        {
+          "operation": "index-append",
+          "warmup-time-period": 120,
+          "clients": 1
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        },
+        {
+          "operation": "index-stats",
+          "clients": 1,
+          "warmup-iterations": 50,
+          "iterations": 50,
+          "target-throughput": 5
+        },
+        {
+          "operation": "node-stats",
+          "clients": 1,
+          "warmup-iterations": 50,
+          "iterations": 50,
+          "target-throughput": 10
+        },
+        {
+          "operation": "default",
+          "clients": 1,
+          "warmup-iterations": 20,
+          "iterations": 100,
+          "target-throughput": 2
+        },
+        {
+          "operation": "term",
+          "clients": 1,
+          "warmup-iterations": 50,
+          "iterations": 100,
+          "target-throughput": 80
+        },
+        {
+          "operation": "phrase",
+          "clients": 1,
+          "warmup-iterations": 50,
+          "iterations": 100,
+          "target-throughput": 80
+        },
+        {
+          "operation": "country_agg_uncached",
+          "clients": 1,
+          "warmup-iterations": 20,
+          "iterations": 100,
+          "target-throughput": 0.3
+        },
+        {
+          "operation": "country_agg_cached",
+          "clients": 1,
+          "warmup-iterations": 50,
+          "iterations": 100,
+          "target-throughput": 80
+        },
+        {
+          "operation": "scroll",
+          "clients": 1,
+          "warmup-iterations": 20,
+          "iterations": 100,
+          "target-throughput": 0.3
+        },
+        {
+          "operation": "expression",
+          "clients": 1,
+          "warmup-iterations": 20,
+          "iterations": 100,
+          "target-throughput": 0.15
+        },
+        {
+          "operation": "painless_static",
+          "clients": 1,
+          "warmup-iterations": 20,
+          "iterations": 100,
+          "target-throughput": 0.1
+        },
+        {
+          "operation": "painless_dynamic",
+          "clients": 1,
+          "warmup-iterations": 20,
+          "iterations": 100,
+          "target-throughput": 0.1
+        }
+      ]
+    },
+    {
+      "name": "append-no-conflicts-index-only",
+      "description": "Indexes the whole document corpus using Elasticsearch default settings. We only adjust the number of replicas as we benchmark a single node cluster and Rally will only start the benchmark if the cluster turns green. Document ids are unique so all index operations are append only.",
+      "index-settings": {
+        "index.number_of_replicas": 0
+      },
+      "schedule": [
+        {
+          "operation": "index-append",
+          "warmup-time-period": 120,
+          "clients": 8
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "append-fast-no-conflicts",
+      "description": "Indexes the whole document corpus using a setup that will lead to a larger indexing throughput than the default settings. Document ids are unique so all index operations are append only.",
+      "index-settings": {
+        "index.number_of_replicas": 0,
+        "index.refresh_interval": "30s",
+        "index.number_of_shards": 6,
+        "index.translog.flush_threshold_size": "4g"
+      },
+      "schedule": [
+        {
+          "operation": "index-append",
+          "warmup-time-period": 120,
+          "clients": 8
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "append-fast-with-conflicts",
+      "description": "Indexes the whole document corpus using a setup that will lead to a larger indexing throughput than the default settings. Rally will produce duplicate ids in 25% of all documents (not configurable) so we can simulate a scenario with appends most of the time and some updates in between.",
+      "index-settings": {
+        "index.number_of_replicas": 0,
+        "index.refresh_interval": "30s",
+        "index.number_of_shards": 6,
+        "index.translog.flush_threshold_size": "4g"
+      },
+      "schedule": [
+        {
+          "operation": "index-update",
+          "warmup-time-period": 45,
+          "clients": 8
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    }
+  ]
+}
