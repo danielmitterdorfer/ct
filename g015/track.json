@@ -13,8 +13,8 @@
           "mapping": "mappings.json",
           "documents": "documents.json.bz2",
           "document-count": 1297182,
-          "compressed-bytes": X,
-          "uncompressed-bytes": X
+          "compressed-bytes": 29134122,
+          "uncompressed-bytes": 400611953
         }
       ]
     }
