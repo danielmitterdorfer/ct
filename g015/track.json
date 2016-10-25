@@ -268,30 +268,9 @@
         {
           "operation": "scroll",
           "clients": 1,
-          "warmup-iterations": 20,
+          "warmup-iterations": 10,
           "iterations": 100,
           "target-throughput": 0.3
-        },
-        {
-          "operation": "expression",
-          "clients": 1,
-          "warmup-iterations": 20,
-          "iterations": 100,
-          "target-throughput": 0.15
-        },
-        {
-          "operation": "painless_static",
-          "clients": 1,
-          "warmup-iterations": 20,
-          "iterations": 100,
-          "target-throughput": 0.1
-        },
-        {
-          "operation": "painless_dynamic",
-          "clients": 1,
-          "warmup-iterations": 20,
-          "iterations": 100,
-          "target-throughput": 0.1
         }
       ]
     },
