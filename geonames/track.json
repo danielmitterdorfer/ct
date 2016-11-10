@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "short-description": "Standard benchmark in Rally (8.6M POIs from Geonames)",
+    "description": "This test indexes 8.6M documents (POIs from Geonames, total 2.8 GB json) using 8 client threads and 5000 docs per bulk request against Elasticsearch",
+    "data-url": "http://benchmarks.elasticsearch.org.s3.amazonaws.com/corpora/geonames"
+  },
+  "indices": [
+    {
+      "name": "geonames",
+      "types": [
+        {
+          "name": "type",
+          "mapping": "mappings.json",
+          "documents": "documents.json.bz2",
+          "document-count": 8647880,
+          "compressed-bytes": 197857614,
+          "uncompressed-bytes": 2790927196
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "name": "bulk",
+      "operation-type": "index",
+      "bulk-size": 1
+    },
+    {
+      "name": "single",
+      "operation-type": "index-single",
+      "parameter-source": "file-reader",
+      "params": {
+      	"batch-size": 5000,
+      	"bulk-size": 1,
+      	"generate-action-and-meta-data": false
+      }
+    },
+    {
+      "name": "force-merge",
+      "operation-type": "force-merge"
+    }
+  ],
+  "challenges": [
+    {
+      "name": "bulk-index",
+      "description": "Bulk index with a bulk size of 1",
+      "index-settings": {
+        "index.number_of_replicas": 0
+      },
+      "schedule": [
+        {
+          "operation": "bulk",
+          "warmup-time-period": 120,
+          "clients": 8
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "single-index",
+      "description": "Index a single document",
+      "index-settings": {
+        "index.number_of_replicas": 0
+      },
+      "schedule": [
+        {
+          "operation": "single",
+          "warmup-time-period": 120,
+          "clients": 8
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+{
+      "name": "bulk-index-with-replica",
+      "description": "Bulk index with a bulk size of 1",
+      "index-settings": {
+        "index.number_of_replicas": 1
+      },
+      "schedule": [
+        {
+          "operation": "bulk",
+          "warmup-time-period": 120,
+          "clients": 8
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "single-index-with-replica",
+      "description": "Index a single document",
+      "index-settings": {
+        "index.number_of_replicas": 1
+      },
+      "schedule": [
+        {
+          "operation": "single",
+          "warmup-time-period": 120,
+          "clients": 8
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    }    
+  ]
+}
+
