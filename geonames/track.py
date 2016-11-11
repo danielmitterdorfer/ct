@@ -1,9 +1,9 @@
 def index_single(es, params):
-    es.percolate(
-        index="geonames",
-        doc_type="type",
+    es.create(
+        index=params["index"],
+        doc_type=params["type"],
         id=params["id"],
-        body=params["body"]
+        body=params["body"][0]
     )
     return 1, "docs"
 
