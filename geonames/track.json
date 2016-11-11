@@ -28,12 +28,10 @@
     {
       "name": "single",
       "operation-type": "index-single",
-      "parameter-source": "file-reader",
-      "params": {
-      	"batch-size": 5000,
-      	"bulk-size": 1,
-      	"generate-action-and-meta-data": false
-      }
+      "param-source": "file-reader",
+      "batch-size": 5000,
+      "bulk-size": 1,
+      "action-and-meta-data": "none"
     },
     {
       "name": "force-merge",
