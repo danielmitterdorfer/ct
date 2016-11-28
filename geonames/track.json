@@ -36,6 +36,37 @@
     {
       "name": "force-merge",
       "operation-type": "force-merge"
+    },
+    {
+      "name": "default",
+      "operation-type": "search",
+      "body": {
+        "query": {
+          "match_all": {}
+        }
+      }
+    },
+    {
+      "name": "term",
+      "operation-type": "search",
+      "body": {
+        "query": {
+          "term": {
+            "country_code": "AT"
+          }
+        }
+      }
+    },
+    {
+      "name": "phrase",
+      "operation-type": "search",
+      "body": {
+        "query": {
+          "match_phrase": {
+            "name": "Sankt Georgen"
+          }
+        }
+      }
     }
   ],
   "challenges": [
@@ -75,7 +106,7 @@
         }
       ]
     },
-{
+    {
       "name": "bulk-index-with-replica",
       "description": "Bulk index with a bulk size of 1",
       "index-settings": {
@@ -110,7 +141,47 @@
           "clients": 1
         }
       ]
-    }    
+    },
+    {
+      "name": "bulk-and-search",
+      "description": "Bulk index with a bulk size of 1",
+      "index-settings": {
+        "index.number_of_replicas": 0
+      },
+      "schedule": [
+        {
+          "parallel": {
+            "tasks": [
+              {
+                "operation": "bulk",
+                "warmup-time-period": 120,
+                "clients": 8
+              },
+              {
+                "operation": "default",
+                "clients": 2,
+                "warmup-iterations": 50,
+                "iterations": 100,
+                "target-throughput": 50
+              },
+              {
+                "operation": "term",
+                "clients": 2,
+                "warmup-iterations": 50,
+                "iterations": 100,
+                "target-throughput": 200
+              },
+              {
+                "operation": "phrase",
+                "clients": 2,
+                "warmup-iterations": 50,
+                "iterations": 100,
+                "target-throughput": 200
+              }
+            ]
+          }
+        }
+      ]
+    }
   ]
 }
-
