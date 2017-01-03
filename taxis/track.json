@@ -23,14 +23,14 @@
     {
       "name": "bulk",
       "operation-type": "index",
-      "batch-size": 5000,
+      "batch-size": 1000,
       "bulk-size": 1
     },
     {
       "name": "single",
       "operation-type": "index-single",
       "param-source": "file-reader",
-      "batch-size": 5000,
+      "batch-size": 1000,
       "bulk-size": 1,
       "action-and-meta-data": "none"
     },
@@ -49,8 +49,8 @@
       "schedule": [
         {
           "operation": "bulk",
-          "warmup-time-period": 120,
-          "clients": 8
+          "warmup-time-period": 10,
+          "clients": 32
         },
         {
           "operation": "force-merge",
@@ -67,8 +67,8 @@
       "schedule": [
         {
           "operation": "single",
-          "warmup-time-period": 120,
-          "clients": 8
+          "warmup-time-period": 10,
+          "clients": 32
         },
         {
           "operation": "force-merge",
@@ -76,6 +76,45 @@
         }
       ]
     },
+    {
+      "name": "bulk-index-async",
+      "description": "Bulk index with a bulk size of 1 (async translog)",
+      "index-settings": {
+        "index.number_of_replicas": 0,
+        "index.translog.durability": "async"
+      },
+      "schedule": [
+        {
+          "operation": "bulk",
+          "warmup-time-period": 5,
+          "clients": 32
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "single-index-async",
+      "description": "Index a single document (async translog)",
+      "index-settings": {
+        "index.number_of_replicas": 0,
+        "index.translog.durability": "async"
+      },
+      "schedule": [
+        {
+          "operation": "single",
+          "warmup-time-period": 5,
+          "clients": 32
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+
 {
       "name": "bulk-index-with-replica",
       "description": "Bulk index with a bulk size of 1",
@@ -85,8 +124,8 @@
       "schedule": [
         {
           "operation": "bulk",
-          "warmup-time-period": 120,
-          "clients": 8
+          "warmup-time-period": 10,
+          "clients": 32
         },
         {
           "operation": "force-merge",
@@ -103,8 +142,8 @@
       "schedule": [
         {
           "operation": "single",
-          "warmup-time-period": 120,
-          "clients": 8
+          "warmup-time-period": 10,
+          "clients": 32
         },
         {
           "operation": "force-merge",
