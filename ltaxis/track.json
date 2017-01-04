@@ -1,0 +1,156 @@
+{
+  "meta": {
+    "short-description": "Trip records completed in yellow and green taxis in New York in 2015",
+    "description": "This test indexes 30M taxi rides using 32 clients and 1 doc per bulk request against Elasticsearch",
+    "data-url": "http://benchmarks.elasticsearch.org.s3.amazonaws.com/corpora/ltaxis"
+  },
+  "indices": [
+    {
+      "name": "ltaxis",
+      "types": [
+        {
+          "name": "type",
+          "mapping": "mappings.json",
+          "documents": "documents.json.bz2",
+          "document-count": 30000000,
+          "compressed-bytes": 897670359,
+          "uncompressed-bytes": 14767102152
+        }
+      ]
+    }
+  ],
+    "operations": [
+    {
+      "name": "bulk",
+      "operation-type": "index",
+      "batch-size": 1000,
+      "bulk-size": 1
+    },
+    {
+      "name": "single",
+      "operation-type": "index-single",
+      "param-source": "file-reader",
+      "batch-size": 1000,
+      "bulk-size": 1,
+      "action-and-meta-data": "none"
+    },
+    {
+      "name": "force-merge",
+      "operation-type": "force-merge"
+    }
+  ],
+  "challenges": [
+    {
+      "name": "bulk-index",
+      "description": "Bulk index with a bulk size of 1",
+      "index-settings": {
+        "index.number_of_replicas": 0
+      },
+      "schedule": [
+        {
+          "operation": "bulk",
+          "warmup-time-period": 120,
+          "clients": 32
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "single-index",
+      "description": "Index a single document",
+      "index-settings": {
+        "index.number_of_replicas": 0
+      },
+      "schedule": [
+        {
+          "operation": "single",
+          "warmup-time-period": 10,
+          "clients": 32
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "bulk-index-async",
+      "description": "Bulk index with a bulk size of 1 (async translog)",
+      "index-settings": {
+        "index.number_of_replicas": 0,
+        "index.translog.durability": "async"
+      },
+      "schedule": [
+        {
+          "operation": "bulk",
+          "warmup-time-period": 120,
+          "clients": 32
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "single-index-async",
+      "description": "Index a single document (async translog)",
+      "index-settings": {
+        "index.number_of_replicas": 0,
+        "index.translog.durability": "async"
+      },
+      "schedule": [
+        {
+          "operation": "single",
+          "warmup-time-period": 120,
+          "clients": 32
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+
+{
+      "name": "bulk-index-with-replica",
+      "description": "Bulk index with a bulk size of 1",
+      "index-settings": {
+        "index.number_of_replicas": 1
+      },
+      "schedule": [
+        {
+          "operation": "bulk",
+          "warmup-time-period": 120,
+          "clients": 32
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "single-index-with-replica",
+      "description": "Index a single document",
+      "index-settings": {
+        "index.number_of_replicas": 1
+      },
+      "schedule": [
+        {
+          "operation": "single",
+          "warmup-time-period": 120,
+          "clients": 32
+        },
+        {
+          "operation": "force-merge",
+          "clients": 1
+        }
+      ]
+    }    
+  ]
+}
+
