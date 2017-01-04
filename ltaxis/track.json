@@ -51,10 +51,6 @@
           "operation": "bulk",
           "warmup-time-period": 120,
           "clients": 32
-        },
-        {
-          "operation": "force-merge",
-          "clients": 1
         }
       ]
     },
@@ -69,10 +65,6 @@
           "operation": "single",
           "warmup-time-period": 10,
           "clients": 32
-        },
-        {
-          "operation": "force-merge",
-          "clients": 1
         }
       ]
     },
@@ -84,14 +76,10 @@
         "index.translog.durability": "async"
       },
       "schedule": [
-        {
+        {  
           "operation": "bulk",
           "warmup-time-period": 120,
           "clients": 32
-        },
-        {
-          "operation": "force-merge",
-          "clients": 1
         }
       ]
     },
@@ -107,10 +95,6 @@
           "operation": "single",
           "warmup-time-period": 120,
           "clients": 32
-        },
-        {
-          "operation": "force-merge",
-          "clients": 1
         }
       ]
     },
@@ -126,10 +110,6 @@
           "operation": "bulk",
           "warmup-time-period": 120,
           "clients": 32
-        },
-        {
-          "operation": "force-merge",
-          "clients": 1
         }
       ]
     },
@@ -144,10 +124,6 @@
           "operation": "single",
           "warmup-time-period": 120,
           "clients": 32
-        },
-        {
-          "operation": "force-merge",
-          "clients": 1
         }
       ]
     }    
