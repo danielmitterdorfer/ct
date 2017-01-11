@@ -1,0 +1,73 @@
+{
+  "short-description": "Generated taxi requests",
+  "description": "Generated taxi requests",
+  "indices": [
+    {
+      "name": "faketaxis",
+      "types": [
+        {
+          "name": "type",
+          "mapping": "mappings.json"
+        }
+      ]
+    }
+  ],
+    "operations": [
+    {
+      "name": "single",
+      "index": "faketaxis",
+      "type": "type",
+      "operation-type": "index-single",
+      "bulk-size": 1
+    }
+  ],
+  "challenges": [
+    {
+      "name": "single-index",
+      "description": "Index a single document",
+      "index-settings": {
+        "index.number_of_replicas": 0
+      },
+      "schedule": [
+        {
+          "operation": "single",
+          "warmup-time-period": 120,
+          "time-period": 1200,
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "single-index-async",
+      "description": "Index a single document (async translog)",
+      "index-settings": {
+        "index.number_of_replicas": 0,
+        "index.translog.durability": "async"
+      },
+      "schedule": [
+        {
+          "operation": "single",
+          "warmup-time-period": 120,
+          "time-period": 1200,
+          "clients": 1
+        }
+      ]
+    },
+    {
+      "name": "single-index-with-replica",
+      "description": "Index a single document",
+      "index-settings": {
+        "index.number_of_replicas": 1
+      },
+      "schedule": [
+        {
+          "operation": "single",
+          "warmup-time-period": 120,
+          "time-period": 1200,
+          "clients": 1
+        }
+      ]
+    }    
+  ]
+}
+

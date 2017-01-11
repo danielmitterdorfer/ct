@@ -1,0 +1,20 @@
+{
+  "type": {
+    "properties": {
+      "trip_type": {
+        "type": "keyword"
+      },
+      "passenger_count": {
+        "type": "integer"
+      },
+      "pickup_datetime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss"
+      }
+    },
+    "_all": {
+      "enabled": false
+    },
+    "dynamic": "strict"
+  }
+}
